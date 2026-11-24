@@ -65,6 +65,34 @@ The heuristic won 70.3% of games against the greedy strategy, while two-turn min
 
 These findings are descriptive and specific to the simulated board distribution and chosen model parameters. Games played on the same board are related observations, and the reported win rates are not independent-sample statistical estimates. Tile margins include unfinished draws.
 
+## Repository files and reproducibility
+
+The project is intentionally organized into six files:
+
+| File | Purpose |
+|---|---|
+| [README.md](README.md) | Research objective, model, methods, and findings. |
+| [index.html](index.html) | Standalone interactive application. |
+| [filler.py](filler.py) | Python implementation of the game and decision strategies. |
+| [experiment.py](experiment.py) | Reproducible simulation and summary calculations. |
+| [games.csv](games.csv) | Original game-level results for all 1,024 simulations. |
+| [test_filler.py](test_filler.py) | Tests of game rules, capture logic, and agreement between Python and the browser application. |
+
+The simulation requires Python 3.10 or newer and uses only the Python standard library. Run the following from the repository directory:
+
+```bash
+python experiment.py --boards 64 --start-seed 1001 --workers 4
+```
+
+This generates a new game-level CSV and summary JSON in the `results/` directory without replacing the original dataset. The seed reproduces the boards and game outcomes; measured execution times can differ.
+
+To run the 22 correctness tests, install pytest and ensure Node.js is available for the browser-engine comparison:
+
+```bash
+python -m pip install pytest
+python -m pytest -q
+```
+
 ## Assumptions and limitations
 
 - The game is an independent implementation inspired by Filler, not an official GamePigeon product.
