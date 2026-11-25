@@ -8,7 +8,7 @@ Filler Strategy Lab explores how different decision-making strategies affect per
 
 Does looking ahead at an opponent's possible responses improve outcomes relative to maximizing immediate gains? How much does incorporating information about future territory improve performance?
 
-The objective is to compare increasingly informed strategies under a common set of game rules and starting conditions.
+The objective is to compare increasingly informed strategies under a common set of game rules and starting conditions. The [executed research notebook](Filler_Strategy_Analysis.ipynb) contains the complete model, reproducible analysis, and visualization.
 
 ## Game and strategies
 
@@ -59,7 +59,7 @@ The experiment consists of **1,024 games**, with 256 games per matchup. Results 
 | Greedy | Random | 245 | 11 | 0 | 95.7% | +29.87 |
 | Heuristic | Greedy | 180 | 49 | 27 | 70.3% | +4.58 |
 | Minimax (depth 2) | Greedy | 211 | 33 | 12 | 82.4% | +5.95 |
-| Minimax (depth 4) | Minimax (depth 2) | 82 | 140 | 34 | 32.0% | +2.47 |
+| Minimax (depth 4) | Minimax (depth 2) | 82 | 140 | 34 | 32.0% | +2.46 |
 
 The heuristic won 70.3% of games against the greedy strategy, while two-turn minimax won 82.4%. Four-turn minimax won more often than it lost against two-turn minimax, but the high draw rate limits the strength of that comparison.
 
@@ -67,31 +67,26 @@ These findings are descriptive and specific to the simulated board distribution 
 
 ## Repository files and reproducibility
 
-The project is intentionally organized into six files:
+The repository contains four files:
 
 | File | Purpose |
 |---|---|
-| [README.md](README.md) | Research objective, model, methods, and findings. |
-| [index.html](index.html) | Standalone interactive application. |
-| [filler.py](filler.py) | Python implementation of the game and decision strategies. |
-| [experiment.py](experiment.py) | Reproducible simulation and summary calculations. |
+| [README.md](README.md) | Research objective, mathematical model, and findings. |
+| [Filler_Strategy_Analysis.ipynb](Filler_Strategy_Analysis.ipynb) | Executed Jupyter notebook containing the complete Python implementation, verification checks, simulation study, results table, and visualization. |
 | [games.csv](games.csv) | Original game-level results for all 1,024 simulations. |
-| [test_filler.py](test_filler.py) | Tests of game rules, capture logic, and agreement between Python and the browser application. |
+| [index.html](index.html) | Standalone interactive application. |
 
-The simulation requires Python 3.10 or newer and uses only the Python standard library. Run the following from the repository directory:
+**Explore the analysis:** open the notebook on GitHub to see the saved results without executing the code.
 
-```bash
-python experiment.py --boards 64 --start-seed 1001 --workers 4
-```
-
-This generates a new game-level CSV and summary JSON in the `results/` directory without replacing the original dataset. The seed reproduces the boards and game outcomes; measured execution times can differ.
-
-To run the 22 correctness tests, install pytest and ensure Node.js is available for the browser-engine comparison:
+**Reproduce the study:** download or clone the repository, open the notebook in Jupyter, and run all cells from the repository directory. Python 3.10 or newer is required, with the following packages:
 
 ```bash
-python -m pip install pytest
-python -m pytest -q
+python -m pip install jupyter pandas matplotlib
 ```
+
+The notebook runs the model verification checks and reproduces all 1,024 games, checking every result against the original dataset except execution time. It does not overwrite `games.csv`. Node.js is optional and is only required for the final browser/Python agreement check. All 22 checks passed in the executed notebook.
+
+**Play:** download and open `index.html` in a modern browser. The application is self-contained and does not require Python or Jupyter.
 
 ## Assumptions and limitations
 
