@@ -10,7 +10,7 @@ One thing led to another, and what started as a fun side project turned into 12,
 
 - **[Jupyter notebook](Filler_Strategy_Analysis.ipynb):** follow the math, see how the strategies work, and reproduce the experiments.
 - **[Game data](games.csv):** individual outcomes from the original 1,024 games; additional experiments are reproducible in the notebook.
-- **[Interactive application](index.html):** download the HTML file and open it in a browser to play against the strategies or watch them compete. No installation is required.
+- **[Play Filler in your browser](https://cjdelos1992.github.io/filler-strategy-lab/):** play against the strategies or watch them compete. No installation is required. You can also [download the HTML application](index.html) and open it locally.
 
 ## What makes a good move?
 
