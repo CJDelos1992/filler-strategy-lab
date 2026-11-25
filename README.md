@@ -4,17 +4,17 @@
 
 After losing a few games of Filler to a friend, I started wondering whether I was making bad decisions or simply failing to think far enough ahead. Rather than practice, I decided to approach the problem as an applied mathematician: formalize the game, develop competing decision strategies, and compare their performance through simulation.
 
-Naturally, this meant playing another 1,024 games. Fortunately, the computer could handle those.
+Naturally, this meant simulating 12,032 games. Fortunately, the computer could handle those.
 
 ## Explore the project
 
 - **[Research notebook](Filler_Strategy_Analysis.ipynb):** mathematical formulation, Python implementation, verification, reproducible simulation, and results.
-- **[Game data](games.csv):** individual outcomes from all 1,024 simulated games.
+- **[Game data](games.csv):** individual outcomes from the original 1,024 games; additional experiments are reproducible in the notebook.
 - **[Interactive application](index.html):** download the HTML file and open it in a browser to play against the strategies or watch them compete. No installation is required.
 
 ## Research questions
 
-Can accounting for future territory improve on a strategy that captures as many tiles as possible on each turn? Does anticipating an opponent's response help? And does looking further ahead consistently improve performance?
+Can accounting for future territory improve on a strategy that captures as many tiles as possible on each turn? Does anticipating an opponent's response help? Does looking further ahead consistently improve performance? And can we calibrate a stronger strategy using simulation?
 
 Filler is a two-player game in which players expand from opposite corners of a board by selecting colors and acquiring neighboring unclaimed tiles. The objective is to finish with more tiles than the opponent. The model uses a 7 × 8 grid, six colors, horizontal and vertical adjacency, and four available colors per turn. Previously acquired tiles cannot be stolen.
 
@@ -40,11 +40,11 @@ $$
 | R | Number of unclaimed tiles closer to each territory along paths through unclaimed cells. Ties and tiles unreachable by both players contribute zero. |
 | M | Largest immediate capture available under the current set of legal colors. |
 
-The coefficients are illustrative rather than estimated or optimized. Minimax extends the evaluation to alternating future moves, with Player 1 maximizing and Player 2 minimizing the value. A depth of two includes the current move and one opponent response. A depth of four includes up to four individual turns. Alpha–beta pruning avoids unnecessary evaluation without changing the minimax value at the specified depth.
+The initial coefficients are illustrative. The calibration experiment below examines alternative weights on separate boards. Minimax extends the evaluation to alternating future moves, with Player 1 maximizing and Player 2 minimizing the value. A depth of two includes the current move and one opponent response. A depth of four includes up to four individual turns. Alpha–beta pruning avoids unnecessary evaluation without changing the minimax value at the specified depth.
 
 The [notebook](Filler_Strategy_Analysis.ipynb) develops the mathematical formulation, explains how the evaluation is calculated, and works through an example where capturing fewer tiles immediately produces a better position.
 
-## Simulation and results
+## Original simulation and results
 
 The experiment uses 64 reproducibly generated boards (seeds 1001–1064). For each of four strategy comparisons, both corner assignment and first player are varied, producing four games per board, 256 per comparison, and 1,024 overall. The same boards are used across comparisons.
 
@@ -59,7 +59,44 @@ All results are reported from Strategy A's perspective.
 
 The heuristic and two-turn minimax strategies outperform greedy play in their respective comparisons. Four-turn minimax wins more often than it loses against two-turn minimax, but 140 games end in draws, including 97 stalled games and 43 completed-board ties. Deeper search is not a guarantee of winning.
 
-Stalled draws are included in the draw column. Mean tile margins include unfinished games. The four games on each board are related observations, so these results are descriptive, not independent-sample statistical inference. The heuristic and two-turn minimax were not directly compared against each other.
+Stalled draws are included in the draw column. Mean tile margins include unfinished games. The four games on each board are related observations, so these results are descriptive, not independent-sample statistical inference. The expanded experiment below compares them directly.
+
+## Expanded experiments
+
+The notebook extends the original benchmark to a full tournament, first-player analysis, stopping-rule sensitivity, weight calibration, held-out evaluation, and feature removal. The experiments comprise **12,032 simulated games across 176 distinct generated boards**, with the original data preserved.
+
+### Which strategy performs best?
+
+All ten head-to-head matchups use the original 64 boards (2,560 games in total). A win earns one point, a draw half a point, and a loss zero. The ranking averages the percentage of available points earned against the other four configurations, weighting opponents equally.
+
+| Strategy | Average match points |
+|---|---:|
+| Minimax (depth 4) | 80.7% |
+| Minimax (depth 2) | 72.6% |
+| Original heuristic | 61.1% |
+| Greedy | 34.3% |
+| Random | 1.3% |
+
+### Can the heuristic be improved?
+
+Twelve weight vectors are compared on 48 calibration boards against greedy and two-turn minimax. The selected weights increase the emphasis on frontier expansion from 2 to 6. They are evaluated on 64 different boards with the same two opponent types and balanced corner/turn-order assignments.
+
+| Evaluation metric | Original | Selected |
+|---|---:|---:|
+| Mean match points | 61.91% | 69.82% |
+| Win rate | 48.05% | 49.41% |
+| Stalled games | 16.80% | 35.55% |
+
+The selected vector earns 7.91 percentage points more in match points on the held-out boards. However, the increase in stalled games makes the result more nuanced: the strategy improves the chosen objective, not necessarily the quality of play. The notebook also removes each feature from the original evaluation in turn to examine its contribution.
+
+## Key takeaways
+
+- **Looking ahead helps.** Four-turn minimax leads the full tournament under the original model. Two-turn minimax earns 62.1% of head-to-head points against the original heuristic.
+- **Turn order matters.** Against greedy, the original heuristic wins 85.9% of games when moving first and 54.7% when moving second.
+- **The rules shape behavior.** Changing the stall cutoff from 12 to 6 or 24 moves does not change win, match-point, or stall rates in the two tested matchups. Changing the outcome of a stalled game to favor the current tile leader raises four-turn minimax's win rate against two-turn minimax from 32.0% to 58.6%. This is a hypothetical rule, not a verified rule of Filler.
+- **The objective matters.** Calibration improves held-out match points but substantially increases stalls. Removing relative proximity from the original heuristic has the largest adverse effect on match points (−9.38 percentage points) among the four feature-removal tests.
+
+These results illustrate a familiar modeling lesson: a better score on a chosen objective does not necessarily mean a better real-world decision rule.
 
 ## Reproduce the analysis
 
@@ -68,18 +105,18 @@ The repository is intentionally small: this README, one executed Jupyter noteboo
 Download or clone the repository, open `Filler_Strategy_Analysis.ipynb` in Jupyter, and run all cells from the repository directory. Python 3.10 or newer is required, along with the following packages:
 
 ```bash
-python -m pip install jupyter pandas matplotlib
+python -m pip install jupyter pandas matplotlib numpy
 ```
 
-The notebook includes 21 Python implementation checks and one optional comparison with the browser engine (requires Node.js). It regenerates all 1,024 game records and verifies agreement with `games.csv`, excluding execution time, without overwriting the dataset. All 22 implementation checks passed in the executed notebook.
+The notebook includes 21 Python implementation checks and one optional comparison with the browser engine (requires Node.js). It regenerates all 1,024 game records and verifies agreement with `games.csv`, excluding execution time, without overwriting the dataset. All 22 original implementation checks passed, along with checks for the alternative stopping rules. The notebook also regenerates the expanded experiments; a full run takes longer than the original benchmark. The browser application retains the original weights and stopping convention.
 
 ## Scope and limitations
 
 - This is an independent model inspired by Filler, not an official GamePigeon implementation. The generated boards exclude identical horizontal or vertical neighbors; their distribution has not been validated against the original game.
 - Moves that capture no tiles are permitted. After 12 consecutive such moves, the model declares a draw, regardless of the tile counts. This is a simulation convention, not a verified official rule. It may encourage a player to avoid a loss by stalling.
-- The heuristic coefficients were not tuned. Finite-depth search does not establish globally optimal play, and the strategies have not been evaluated against human players.
+- The original heuristic coefficients were illustrative. Calibration tests a limited set of 12 candidates; held-out performance is limited to the same board generator and opponent types. Finite-depth search does not establish globally optimal play, and the strategies have not been evaluated against human players.
 
-Future work could include tuning the weights on a set of training boards, evaluation on separate boards, a direct comparison of heuristic and minimax strategies, and sensitivity analysis for the stall rule.
+Future work could explicitly penalize stalled games during calibration, test alternative board distributions and opponent strategies, and compare the model with human play.
 
 For now, the model suggests that thinking ahead is useful. Whether it helps me win the next game against my friend remains to be seen.
 
