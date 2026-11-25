@@ -1,20 +1,20 @@
 # Filler Strategy Lab
 
-*An applied mathematics passion project inspired by a few too many lost games of Filler.*
+*A little applied mathematics, a lot of Filler, and a slightly excessive response to losing.*
 
-After losing a few games of Filler to a friend, I started wondering whether I was making bad decisions or simply failing to think far enough ahead. Rather than practice, I decided to approach the problem as an applied mathematician: formalize the game, develop competing decision strategies, and compare their performance through simulation.
+After losing a few too many games of Filler to a friend, I started wondering whether I could get better at it by breaking the game down mathematically. Most people would probably just practice. I built a model, tried a few strategies, and let the computer play against itself.
 
-Naturally, this meant simulating 12,032 games. Fortunately, the computer could handle those.
+One thing led to another, and what started as a fun side project turned into 12,032 simulated games. The result is a playable version of Filler and a Python notebook exploring what makes a good move (and what happens when a seemingly clever strategy spends most of its time avoiding defeat).
 
 ## Explore the project
 
-- **[Research notebook](Filler_Strategy_Analysis.ipynb):** mathematical formulation, Python implementation, verification, reproducible simulation, and results.
+- **[Jupyter notebook](Filler_Strategy_Analysis.ipynb):** follow the math, see how the strategies work, and reproduce the experiments.
 - **[Game data](games.csv):** individual outcomes from the original 1,024 games; additional experiments are reproducible in the notebook.
 - **[Interactive application](index.html):** download the HTML file and open it in a browser to play against the strategies or watch them compete. No installation is required.
 
-## Research questions
+## What makes a good move?
 
-Can accounting for future territory improve on a strategy that captures as many tiles as possible on each turn? Does anticipating an opponent's response help? Does looking further ahead consistently improve performance? And can we calibrate a stronger strategy using simulation?
+Is grabbing the most tiles always the best move, or is it worth giving up a tile or two to get into a better position? What happens if the player starts thinking a few turns ahead? And can the computer find better weights for judging a position than the ones I started with?
 
 Filler is a two-player game in which players expand from opposite corners of a board by selecting colors and acquiring neighboring unclaimed tiles. The objective is to finish with more tiles than the opponent. The model uses a 7 × 8 grid, six colors, horizontal and vertical adjacency, and four available colors per turn. Previously acquired tiles cannot be stolen.
 
@@ -44,7 +44,7 @@ The initial coefficients are illustrative. The calibration experiment below exam
 
 The [notebook](Filler_Strategy_Analysis.ipynb) develops the mathematical formulation, explains how the evaluation is calculated, and works through an example where capturing fewer tiles immediately produces a better position.
 
-## Original simulation and results
+## First experiment: how do the strategies compare?
 
 The experiment uses 64 reproducibly generated boards (seeds 1001–1064). For each of four strategy comparisons, both corner assignment and first player are varied, producing four games per board, 256 per comparison, and 1,024 overall. The same boards are used across comparisons.
 
@@ -61,7 +61,7 @@ The heuristic and two-turn minimax strategies outperform greedy play in their re
 
 Stalled draws are included in the draw column. Mean tile margins include unfinished games. The four games on each board are related observations, so these results are descriptive, not independent-sample statistical inference. The expanded experiment below compares them directly.
 
-## Expanded experiments
+## Taking the experiment a little further
 
 The notebook extends the original benchmark to a full tournament, first-player analysis, stopping-rule sensitivity, weight calibration, held-out evaluation, and feature removal. The experiments comprise **12,032 simulated games across 176 distinct generated boards**, with the original data preserved.
 
@@ -89,14 +89,14 @@ Twelve weight vectors are compared on 48 calibration boards against greedy and t
 
 The selected vector earns 7.91 percentage points more in match points on the held-out boards. However, the increase in stalled games makes the result more nuanced: the strategy improves the chosen objective, not necessarily the quality of play. The notebook also removes each feature from the original evaluation in turn to examine its contribution.
 
-## Key takeaways
+## What did I learn?
 
 - **Looking ahead helps.** Four-turn minimax leads the full tournament under the original model. Two-turn minimax earns 62.1% of head-to-head points against the original heuristic.
 - **Turn order matters.** Against greedy, the original heuristic wins 85.9% of games when moving first and 54.7% when moving second.
 - **The rules shape behavior.** Changing the stall cutoff from 12 to 6 or 24 moves does not change win, match-point, or stall rates in the two tested matchups. Changing the outcome of a stalled game to favor the current tile leader raises four-turn minimax's win rate against two-turn minimax from 32.0% to 58.6%. This is a hypothetical rule, not a verified rule of Filler.
 - **The objective matters.** Calibration improves held-out match points but substantially increases stalls. Removing relative proximity from the original heuristic has the largest adverse effect on match points (−9.38 percentage points) among the four feature-removal tests.
 
-These results illustrate a familiar modeling lesson: a better score on a chosen objective does not necessarily mean a better real-world decision rule.
+The most interesting result was not simply that thinking ahead helps. It was that the tuned strategy found a way to earn more points largely by drawing more often, rather than by winning many more games. The choice of what to optimize matters just as much as how to optimize it.
 
 ## Reproduce the analysis
 
@@ -118,8 +118,8 @@ The notebook includes 21 Python implementation checks and one optional compariso
 
 Future work could explicitly penalize stalled games during calibration, test alternative board distributions and opponent strategies, and compare the model with human play.
 
-For now, the model suggests that thinking ahead is useful. Whether it helps me win the next game against my friend remains to be seen.
+As for the original problem, the model suggests that thinking ahead is useful. Whether I can actually beat my friend is still an open question.
 
 ## Project note
 
-This was an AI-assisted passion project. AI tools helped with implementation, testing, and documentation.
+This was a fun, AI-assisted side project. AI tools helped with implementation, testing, and documentation.
